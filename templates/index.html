@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>葛西ニュース</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>葛西ニュース</h1>
+        <p class="updated">最終更新: {{ updated_at }}</p>
+    </header>
+
+    <nav class="category-tabs">
+        {% for cat in categories %}
+        <button class="tab-btn{% if loop.first %} active{% endif %}" data-category="{{ cat }}">
+            {{ cat }}
+        </button>
+        {% endfor %}
+    </nav>
+
+    <main>
+        <ul class="news-list">
+            {% for entry in entries %}
+            <li class="news-item" data-category="{{ entry.category }}">
+                <span class="category-badge badge-{{ entry.category | category_class }}">
+                    {{ entry.category }}
+                </span>
+                <h2 class="news-title">
+                    <a href="{{ entry.link }}" target="_blank" rel="noopener noreferrer">
+                        {{ entry.title }}
+                    </a>
+                </h2>
+                <div class="news-meta">
+                    {% if entry.source %}<span class="source">{{ entry.source }}</span>{% endif %}
+                    <time datetime="{{ entry.published }}">{{ entry.published | format_date_jst }}</time>
+                </div>
+            </li>
+            {% else %}
+            <li class="no-news">ニュースがありません</li>
+            {% endfor %}
+        </ul>
+    </main>
+
+    <footer>
+        <p>葛西エリアのニュースを自動収集しています（<span id="visible-count">{{ total_count }}</span>件）</p>
+    </footer>
+
+    <script>
+    (function() {
+        var tabs = document.querySelectorAll('.tab-btn');
+        var items = document.querySelectorAll('.news-item');
+        var countEl = document.getElementById('visible-count');
+
+        function updateCount() {
+            var count = 0;
+            items.forEach(function(item) {
+                if (item.style.display !== 'none') count++;
+            });
+            countEl.textContent = count;
+        }
+
+        tabs.forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                tabs.forEach(function(t) { t.classList.remove('active'); });
+                tab.classList.add('active');
+
+                var category = tab.getAttribute('data-category');
+
+                items.forEach(function(item) {
+                    if (category === 'すべて' || item.getAttribute('data-category') === category) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+
+                updateCount();
+            });
+        });
+    })();
+    </script>
+</body>
+</html>
